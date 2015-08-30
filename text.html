@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>无标题文档</title>
+    <script src="static/traceur.js"></script>
+    <script src="static/bootstrap.js"></script>
+    <script src="static/jquery.js"></script>
+    <script src="static/ds.e6toe5.js"></script>
+    <style type="text/css">
+	.ajaxcontent{
+		width:1000px;
+		height:500px;
+		border:1px solid #dedede;
+		margin:50px auto;
+	}
+	</style>
+</head>
+
+<body>
+    
+    <div class="debug"></div>
+    <div class="debug2"></div>
+    
+    <div class="ajaxcontent">
+    
+    </div>
+    
+    <script>
+	//Ds.import("static/css/b.css,static/js/a.js",function(dcoms){
+	//});
+	var view=Ds.getViewSize();
+	$(".debug2").html(view.clientWidth);
+	Ds.dlg({
+		getDlgObj:function(){	
+		    this.param['isOpenMove']=true;
+			this.param['moveType']=3; //1,2,3,4
+			this.stopWindow();
+		},
+		title:'这是一个对话框',
+		width:800,
+		height:400,
+		htmlContent:['<div class="" style="height:600px;">对话框的内容</div>'],
+		closeCallback:function(){
+			Ds.alert("你已经关闭了对话框","right");
+		}
+		
+	});
+    Ds.dlg({
+		getDlgObj:function(){
+			this.resizeWindow(600,200,true); //强制改变高度
+		},
+		title:'这是第二个对话框',
+		width:600,
+		height:400,
+		htmlContent:['<div class="">对话框的内容</div>']
+		
+	});
+	
+
+	//Ds.dcom.callc("login","open",{});
+	Ds.request("p.php",{w:'ni',h:'hao'},'','get',function(d){
+		Ds.alert("成功取到数据","right");
+		$(".ajaxcontent").html("从后台取到的数据是"+d);		
+	},true);
+  
+
+	
+	</script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+/* CSS Document */
+
+.g_dragging{
+	cursor:move;
+}
+
+.dcom-sys-dlg-graybg{
+	width:100%; height:100%; 
+	position:fixed; 
+	z-index:999; 
+	top:0px; 
+	left:0px; 
+	filter:Alpha(Opacity=50); 
+	background:#000;
+	opacity:0.5;
+}
+.dcom-sys-dlg-body{padding:5px; z-index:19999; position:absolute;}
+.dcom-sys-dlg-container{position:relative;z-index:1; background:#fff; border-radius:0px 0px 3px 3px;}
+.dcom-sys-dlg-container.black{
+	background:#000;
+	filter:Alpha(Opacity=85);
+	opacity:0.85;
+	border:1px solid #848484;
+}
+.dcom-sys-dlg-close{
+	right:10px;
+	top:10px;
+	width:32px;
+	height:32px;
+	cursor:pointer;
+	display:block;
+	position:absolute;
+	background:url(../images/dlg-close.png) no-repeat;
+	background-size:contain;
+}
+.dcom-sys-dlg-title{
+	background: none repeat scroll 0 0 #F8F8F8;
+    color: #666666;
+    height: 42px;
+    line-height: 42px;
+    width: 100%;
+	border-radius:3px 3px 0px 0px;
+}
+.dcom-sys-dlg-title h3{
+	color:#313131;
+	padding:0px;
+	margin:0px;
+	display:block;
+    font-family: Microsoft Yahei;
+    font-size: 16px;
+    font-weight: bold;
+    height: 42px;
+    padding-left: 18px;
+    width: auto;
+}
+.dcom-sys-dlg-container.black .dlg_popdlg_title{
+	background:none;
+	color:#efefef;
+}
+.dcom-sys-dlg-container.black .dlg_popdlg_title h3{
+	color:#efefef;
+}
+
+.dcom-sys-dlg-layerbg{
+   background:#000000;
+   border-radius: 3px 3px 3px 3px;
+   height: 100%;left: 0;
+   filter:Alpha(Opacity=10);opacity: 0.1;
+   position: absolute;
+   top: 0px;
+   width: 100%;
+   z-index:-1;
+}
