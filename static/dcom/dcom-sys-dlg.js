@@ -7,9 +7,11 @@
 	  	 outinterface:['open'], /*对外结构*/
 		 dlgs:[], //组建所创建的dlgs数组
 		 init:function(){
-			 Ds.dcom.addCom("sys-dlg",this);//注册组建	
+			 Ds.dcom.addCom("sys-dlg",this);//注册组建
+			 
 		 },
 		 callouti:function(oiname,param){
+			 	
 			    // alert(oiname);
 				//调用接口,必须函数
 				if($.inArray(oiname,__t.outinterface)==-1){
@@ -41,7 +43,7 @@
 			 dom.className="dcom-sys-dlg-graybg g-graybg";
 		 },
 		 removeLayerbg:function(){
-			 if(__t.dlgs.length!=0){
+			 if(Ds._getGArr("dlg/list").length!=0){
 				 return;
 			 }
 			 var dom=Ds.E("dcom-sys-dlg-graybg");
@@ -87,7 +89,7 @@
 				   }
 				   A.push('<div class="dcom-sys-dlg-body '+__this.param['className']+'" id="dcom-sys-dlg-body-'+__this.guid+'">');
 				   if(__this.param.title){
-					   A.push('<div class="dcom-sys-dlg-title" id="dcom-sys-dlg-title-'+__this.guid+'"><h3>'+__this.param.title+'</3></div>');
+					   A.push('<div class="dcom-sys-dlg-title" id="dcom-sys-dlg-title-'+__this.guid+'"><h3>'+__this.param.title+'</h3></div>');
 				   }
 				   A.push('<div class="dcom-sys-dlg-container" id="dcom-sys-dlg-container-'+__this.guid+'">');
 				   
@@ -122,7 +124,7 @@
 				       __this.resizeWindow(__this.param['width'],__this.param['height']);
 				   }
 				   if(!__this.param['disableDrag']){
-					   Ds.import("static/lib/ds.drag.js",function(){
+					   Ds.include("static/lib/ds.drag.js",function(){
 					       
 						   new Ds.Drag({
 							   target:"#dcom-sys-dlg-body-"+__this.guid,
@@ -196,6 +198,10 @@
 				  ch+=th;
 				  $("#dcom-sys-dlg-body-"+__this.guid).width(cw).height(ch);
 				  
+				  if(Ds.isIE7){
+					  $("#dcom-sys-dlg-layerbg-"+__this.guid).height(ch+10);
+				  }
+				  
 				  return __this;
 			  
 		   };
@@ -246,6 +252,9 @@
 				  $("#dcom-sys-dlg-body-"+__this.guid).height(h);
 				  var minch=h-th;
 				  $("#dcom-sys-dlg-container-"+__this.guid).css("min-height",minch+"px");
+				  if(Ds.isIE7){
+					  $("#dcom-sys-dlg-layerbg-"+__this.guid).height(h+10);
+				  }
 			  }
 			  
 			  __this.stopWindow();

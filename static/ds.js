@@ -9,7 +9,8 @@ date:2015-8-30
 (function(_W_) {
 
 	var toString = {}.toString,
-		slice = [].slice;
+		slice = [].slice,
+		UA = _W_.navigator.userAgent.toLowerCase();
 
 	if (!Array.prototype.forEach) {
 		Array.prototype.forEach = function(callback, thisArg) {
@@ -18,7 +19,7 @@ date:2015-8-30
 				throw new TypeError(" this is null or not defined");
 			}
 			var O = Object(this);
-			var len = O.length >>> 0; 
+			var len = O.length >>> 0;
 			if (!Ds.isFunction(callback)) {
 				throw new TypeError(callback + " is not a function");
 			}
@@ -35,7 +36,31 @@ date:2015-8-30
 				k++;
 			}
 		};
+		Array.prototype.map = function(fun) {
+			var len = this.length;
+			if (!Ds.isFunction(fun)) throw new TypeError();
+
+			var res = new Array(len);
+			var thisp = arguments[1];
+			for (var i = 0; i < len; i++) {
+				if (i in this) res[i] = fun.call(thisp, this[i], i, this);
+			}
+			return res;
+		};
+		Array.prototype.filter = function(fun) {
+			var len = this.length;
+			if (!Ds.isFunction(fun)) throw new TypeError();
+			var res = new Array();
+			var thisp = arguments[1];
+			for (var i = 0; i < len; i++) {
+				if (fun.call(thisp, this[i])) {
+					res.push(this[i]);
+				}
+			}
+			return res;
+		};
 	}
+
 /**
    简单的Promise为了兼容IE
  **/
@@ -69,7 +94,7 @@ date:2015-8-30
 		isDebug: false,
 		//开发状态
 		rootUrl: '/',
-		dcomRootUrl: 'static/dcom/',
+		dcomRootUrl: 'static/dcom/'
 	};
 
 	function Ds() {}
@@ -95,6 +120,25 @@ date:2015-8-30
 		guid: 0,
 		Cache: {},
 		Promise: _W_.Promise || Promise,
+		getBrowerV: function() {
+			if (!Ds.isEmpty(Ds._browerVersion)) {
+				return Ds._browerVersion;
+			}
+			var b = Ds._browerVersion = {},
+				u = UA;
+			var s;
+			(s = u.match(/msie ([\d.]+)/)) ? b.ie = s[1] : (s = u.match(/firefox\/([\d.]+)/)) ? b.firefox = s[1] : (s = u.match(/chrome\/([\d.]+)/)) ? b.chrome = s[1] : (s = u.match(/opera.([\d.]+)/)) ? b.opera = s[1] : (s = u.match(/version\/([\d.]+).*safari/)) ? b.safari = s[1] : 0;
+			return b;
+		},
+		isIE8: function() {
+			//是否是ie8以下版本包含ie8
+			var v = Ds.getBrowerV();
+			return v.ie ? (parseInt(v.ie) < 9 ? true : false) : false;
+		},
+		isIE7: function() {
+			var v = Ds.getBrowerV();
+			return v.ie ? (parseInt(v.ie) < 8 ? true : false) : false;
+		},
 		getGuid: function() {
 
 			return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -241,7 +285,7 @@ date:2015-8-30
 			return obj;
 
 		},
-		import: function(fs, cb, obj) {
+		include: function(fs, cb, obj) {
 			//导入文件
 			obj = obj || Ds;
 			fs = Ds.isArray(fs) ? fs : fs.split(',');
@@ -285,9 +329,9 @@ date:2015-8-30
 							if (!Ds.isUndefined(odom)) {
 								odoms.push(odom)
 							};
-							return _selfcall(fa);
+							_selfcall(fa);
+
 						});
-						return promise;
 					};
 				_selfcall(fa);
 
@@ -325,7 +369,7 @@ date:2015-8-30
 			return odiv;
 		},
 		_putLoadFileToCache: function(fn) {
-			var c = Ds._getGArr("importFileCache/list");
+			var c = Ds._getGArr("includeFileCache/list");
 			var tmpArr = [];
 			c.forEach(function(f) {
 				if (f['file'] == fn['file']) {
@@ -336,11 +380,11 @@ date:2015-8-30
 				}
 			});
 			c = tmpArr;
-			Ds.setG("importFileCache/list", c);
+			Ds.setG("includeFileCache/list", c);
 		},
 		_inLoadedFileQuque: function(file) {
 			//是否加载过该文件
-			var c = Ds._getGArr("importFileCache/list");
+			var c = Ds._getGArr("includeFileCache/list");
 			var isExist = false;
 			c.forEach(function(f) {
 				if (f['file'] == file) {
@@ -351,7 +395,7 @@ date:2015-8-30
 			return isExist;
 		},
 		_removeLoadFileFromCache: function(file) {
-			var c = Ds._getGArr("importFileCache/list");
+			var c = Ds._getGArr("includeFileCache/list");
 			var tmpArr = [];
 			c.forEach(function(f) {
 				if (f['file'] != fn['file']) {
@@ -359,7 +403,7 @@ date:2015-8-30
 				}
 			});
 			c = tmpArr;
-			Ds.setG("importFileCache/list", c);
+			Ds.setG("includeFileCache/list", c);
 		},
 		_setLoadFileStatus: function(file, isload) {
 			var fn = {
@@ -369,7 +413,7 @@ date:2015-8-30
 			Ds._putLoadFileToCache(fn);
 		},
 		_getLoadFileStatus: function(file) {
-			var c = Ds._getGArr("importFileCache/list");
+			var c = Ds._getGArr("includeFileCache/list");
 			c.forEach(function(f) {
 				if (f['file'] != file) {
 					return f['isload'] || 0;
@@ -422,20 +466,21 @@ date:2015-8-30
 					ofile.src = file;
 					oBody.appendChild(ofile);
 				}
+
 				ofile.guid = Ds.getGuid();
 				if (Ds.isFunction(func)) {
-					if (!0) {
-						ofile.onload = function() {
-							//加载完成放入缓存器中
-							resolve.call(promise, ofile);
-							Ds._setLoadFileStatus(file, 1);
-						}
-					} else {
+					if (Ds.isIE8()) {
 						ofile.onreadystatechange = function() {
 							if (ofile.readyState == 'loaded' || ofile.readyState == 'complete') {
 								resolve.call(promise, ofile);
 								Ds._setLoadFileStatus(file, 1);
 							}
+						}
+
+					} else {
+						ofile.onload = function() {
+							resolve.call(promise, ofile);
+							Ds._setLoadFileStatus(file, 1);
 						}
 					}
 				}
@@ -463,7 +508,9 @@ date:2015-8-30
 			var tem = {};
 			if (Ds.isArray(keys)) {
 				for (var k in keys) {
-					if (obj.hasOwnProperty(keys[k])) {
+					if (obj.hasOwnProperty && obj.hasOwnProperty(keys[k])) {
+						tem[keys[k]] = obj[keys[k]];
+					} else {
 						tem[keys[k]] = obj[keys[k]];
 					}
 				}
@@ -677,7 +724,6 @@ date:2015-8-30
 					for (var k in src) {
 						if (src[k] != null && !$.isEmpty(src[k])) {
 							url.push(k);
-
 							url.push(encodeURIComponent(src[k]));
 						}
 					}
@@ -749,6 +795,7 @@ date:2015-8-30
 					}
 				}
 			} else {
+
 				var jsFile = Ds.CONFIG.dcomRootUrl + "dcom-" + comname + ".js";
 				var cssFile = Ds.CONFIG.dcomRootUrl + "css/dcom-" + comname + ".css";
 				if (Ds.CONFIG.isDebug) {
@@ -756,7 +803,8 @@ date:2015-8-30
 					jsFile += rdm;
 					cssFile += rdm;
 				}
-				Ds.import([cssFile, jsFile], function(doms) {
+				Ds.include([cssFile, jsFile], function(doms) {
+
 					var comobj = Ds.dcom.getCom(comname);
 					if (comobj != null) {
 						comobj.bindDoms = doms;

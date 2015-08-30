@@ -7,7 +7,9 @@
 	  	 outinterface:['open'], /*对外结构*/
 		 alerttimer:null,
 		 init:function(){
-			 Ds.dcom.addCom("sys-alert",this);//注册组建	
+			
+			 Ds.dcom.addCom("sys-alert",this);//注册组建
+			 
 		 },
 		 callouti:function(oiname,param){
 			//调用接口,必须函数

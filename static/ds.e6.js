@@ -3,12 +3,12 @@
 
 ((_W_)=>{
 
- var toString={}.toString,slice=[].slice;
+ var toString={}.toString,slice=[].slice,UA=_W_.navigator.userAgent.toLowerCase();
  var CONFIG={
 		  //配置信息
 		  isDebug:false, //开发状态
 		  rootUrl:'/',
-		  dcomRootUrl:'static/dcom/',
+		  dcomRootUrl:'static/dcom/'
   };
   class Ds{
 	  constructor(){
@@ -20,6 +20,26 @@
 	  guid:0,
 	  Cache: {},
 	  Promise:Promise,
+	  getBrowerV(){
+		  if(!Ds.isEmpty(Ds._browerVersion)){return Ds._browerVersion;}
+		  var b=Ds._browerVersion={},u= UA;
+          var s;
+          (s = u.match(/msie ([\d.]+)/)) ? b.ie = s[1] :
+          (s = u.match(/firefox\/([\d.]+)/)) ? b.firefox = s[1] :
+          (s = u.match(/chrome\/([\d.]+)/)) ? b.chrome = s[1] :
+          (s = u.match(/opera.([\d.]+)/)) ? b.opera = s[1] :
+          (s = u.match(/version\/([\d.]+).*safari/)) ? b.safari = s[1] : 0;
+		  return b;
+	  },
+	  isIE8(){
+		  //是否是ie8以下版本包含ie8
+		  var v=Ds.getBrowerV();
+		  return v.ie?(parseInt(v.ie)<9?true:false):false;
+	  },
+	  isIE7(){
+		  var v=Ds.getBrowerV();
+		  return v.ie?(parseInt(v.ie)<8?true:false):false;
+	  },
 	  getGuid(){
 		  
 		  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){
@@ -165,7 +185,7 @@
 		  return obj;
 		  
 	  },
-	  import(fs,cb,obj=Ds){
+	  include(fs,cb,obj=Ds){
 		  //导入文件
 		  fs=Ds.isArray(fs)?fs:fs.split(',');
 		  var fa=[];
@@ -231,7 +251,7 @@
 			return odiv;
 	   },
 	   _putLoadFileToCache(fn){
-		   var c=Ds._getGArr("importFileCache/list");
+		   var c=Ds._getGArr("includeFileCache/list");
 		   var tmpArr=[];
 		   c.forEach(function(f){
 			   if(f['file']==fn['file']){
@@ -242,11 +262,11 @@
 			   }
 		   });
 		   c=tmpArr;
-		   Ds.setG("importFileCache/list",c);
+		   Ds.setG("includeFileCache/list",c);
 	   },
 	   _inLoadedFileQuque(file){
 		   //是否加载过该文件
-		   var c=Ds._getGArr("importFileCache/list");
+		   var c=Ds._getGArr("includeFileCache/list");
 		   var isExist=false;
 		   c.forEach(function(f){
 			   if(f['file']==file){
@@ -257,7 +277,7 @@
 		   return isExist;
 	   },
 	   _removeLoadFileFromCache(file){
-		   var c=Ds._getGArr("importFileCache/list");
+		   var c=Ds._getGArr("includeFileCache/list");
 		   var tmpArr=[];
 		   c.forEach(function(f){
 			   if(f['file']!=fn['file']){
@@ -265,14 +285,14 @@
 			   }
 		   });
 		   c=tmpArr;
-		   Ds.setG("importFileCache/list",c);
+		   Ds.setG("includeFileCache/list",c);
 	   },
 	   _setLoadFileStatus(file,isload){
 		   var fn={file:file,isload:isload};
 		   Ds._putLoadFileToCache(fn);
 	   },
 	   _getLoadFileStatus(file){
-		   var c=Ds._getGArr("importFileCache/list");
+		   var c=Ds._getGArr("includeFileCache/list");
 		   c.forEach(function(f){
 			   if(f['file']!=file){
 				   return f['isload']||0;
@@ -323,19 +343,10 @@
 				}
 				ofile.guid = Ds.getGuid();
 				if (Ds.isFunction(func)) {
-					if (!0) {
-						ofile.onload = function() {
-							//加载完成放入缓存器中
-							resolve.call(promise,ofile);
-							Ds._setLoadFileStatus(file,1);
-						}
-					} else {
-						ofile.onreadystatechange = function() {
-							if (ofile.readyState == 'loaded' || ofile.readyState == 'complete') {
-								resolve.call(promise,ofile);
-								Ds._setLoadFileStatus(file,1);
-							}
-						}
+					ofile.onload = function() {
+						//加载完成放入缓存器中
+						resolve.call(promise,ofile);
+						Ds._setLoadFileStatus(file,1);
 					}
 				}
 			   
@@ -631,7 +642,7 @@
 					jsFile+=rdm;
 					cssFile+=rdm;
 				}
-				Ds.import([cssFile,jsFile],function(doms) {
+				Ds.include([cssFile,jsFile],function(doms) {
 					var comobj = Ds.dcom.getCom(comname);
 					comobj.bindDoms=doms;
 					if (Ds.isFunction(func)) {

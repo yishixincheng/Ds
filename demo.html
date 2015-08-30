@@ -30,7 +30,6 @@
 	$(".debug2").html(view.clientWidth);
 
 
-	
 	Ds.dlg({
 		getDlgObj:function(){	
 		    this.param['isOpenMove']=true;
@@ -46,7 +45,7 @@
 		}
 		
 	});
-	
+
     Ds.dlg({
 		getDlgObj:function(){
 			this.resizeWindow(600,200,true); //强制改变高度
@@ -58,8 +57,8 @@
 		
 	});
 	
-
-	/*//Ds.dcom.callc("login","open",{});
+    /*
+	//Ds.dcom.callc("login","open",{});
 	Ds.request("p.php",{w:'ni',h:'hao'},'','get',function(d){
 		Ds.alert("成功取到数据","right");
 		$(".ajaxcontent").html("从后台取到的数据是"+d);		

@@ -1,6 +1,7 @@
 (function(_W_) {
   var toString = {}.toString,
-      slice = [].slice;
+      slice = [].slice,
+      UA = _W_.navigator.userAgent.toLowerCase();
   var CONFIG = {
     isDebug: false,
     rootUrl: '/',
@@ -17,6 +18,24 @@
     guid: 0,
     Cache: {},
     Promise: Promise,
+    getBrowerV: function() {
+      if (!Ds.isEmpty(Ds._browerVersion)) {
+        return Ds._browerVersion;
+      }
+      var b = Ds._browerVersion = {},
+          u = UA;
+      var s;
+      (s = u.match(/msie ([\d.]+)/)) ? b.ie = s[1] : (s = u.match(/firefox\/([\d.]+)/)) ? b.firefox = s[1] : (s = u.match(/chrome\/([\d.]+)/)) ? b.chrome = s[1] : (s = u.match(/opera.([\d.]+)/)) ? b.opera = s[1] : (s = u.match(/version\/([\d.]+).*safari/)) ? b.safari = s[1] : 0;
+      return b;
+    },
+    isIE8: function() {
+      var v = Ds.getBrowerV();
+      return v.ie ? (parseInt(v.ie) < 9 ? true : false) : false;
+    },
+    isIE7: function() {
+      var v = Ds.getBrowerV();
+      return v.ie ? (parseInt(v.ie) < 8 ? true : false) : false;
+    },
     getGuid: function() {
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
         var r = Math.random() * 16 | 0,
@@ -176,7 +195,7 @@
       }
       return obj;
     },
-    import: function(fs, cb) {
+    include: function(fs, cb) {
       var $__20;
       var $__18,
           $__19;
@@ -305,7 +324,7 @@
       return odiv;
     },
     _putLoadFileToCache: function(fn) {
-      var c = Ds._getGArr("importFileCache/list");
+      var c = Ds._getGArr("includeFileCache/list");
       var tmpArr = [];
       c.forEach(function(f) {
         if (f['file'] == fn['file']) {
@@ -315,10 +334,10 @@
         }
       });
       c = tmpArr;
-      Ds.setG("importFileCache/list", c);
+      Ds.setG("includeFileCache/list", c);
     },
     _inLoadedFileQuque: function(file) {
-      var c = Ds._getGArr("importFileCache/list");
+      var c = Ds._getGArr("includeFileCache/list");
       var isExist = false;
       c.forEach(function(f) {
         if (f['file'] == file) {
@@ -328,7 +347,7 @@
       return isExist;
     },
     _removeLoadFileFromCache: function(file) {
-      var c = Ds._getGArr("importFileCache/list");
+      var c = Ds._getGArr("includeFileCache/list");
       var tmpArr = [];
       c.forEach(function(f) {
         if (f['file'] != fn['file']) {
@@ -336,7 +355,7 @@
         }
       });
       c = tmpArr;
-      Ds.setG("importFileCache/list", c);
+      Ds.setG("includeFileCache/list", c);
     },
     _setLoadFileStatus: function(file, isload) {
       var fn = {
@@ -346,7 +365,7 @@
       Ds._putLoadFileToCache(fn);
     },
     _getLoadFileStatus: function(file) {
-      var c = Ds._getGArr("importFileCache/list");
+      var c = Ds._getGArr("includeFileCache/list");
       c.forEach(function(f) {
         if (f['file'] != file) {
           return f['isload'] || 0;
@@ -400,19 +419,10 @@
         }
         ofile.guid = Ds.getGuid();
         if (Ds.isFunction(func)) {
-          if (!0) {
-            ofile.onload = function() {
-              resolve.call(promise, ofile);
-              Ds._setLoadFileStatus(file, 1);
-            };
-          } else {
-            ofile.onreadystatechange = function() {
-              if (ofile.readyState == 'loaded' || ofile.readyState == 'complete') {
-                resolve.call(promise, ofile);
-                Ds._setLoadFileStatus(file, 1);
-              }
-            };
-          }
+          ofile.onload = function() {
+            resolve.call(promise, ofile);
+            Ds._setLoadFileStatus(file, 1);
+          };
         }
       });
       return promise;
@@ -722,7 +732,7 @@
           jsFile += rdm;
           cssFile += rdm;
         }
-        Ds.import([cssFile, jsFile], function(doms) {
+        Ds.include([cssFile, jsFile], function(doms) {
           var comobj = Ds.dcom.getCom(comname);
           comobj.bindDoms = doms;
           if (Ds.isFunction(func)) {

@@ -71,8 +71,8 @@
 			  if (this.$target) {
 				return;
 			  }
-			  event.preventDefault();
-			  event.stopPropagation();
+			  event.preventDefault&&event.preventDefault();
+			  event.stopPropagation&&event.stopPropagation();
 			  this.bind('on');
 			  this.$target =this.target.eq(0);
 			  this.$target.addClass('g_dragging');
