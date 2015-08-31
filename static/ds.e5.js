@@ -335,17 +335,23 @@
 	   },
 	   _putLoadFileToCache:function(fn){
 		   var c=Ds._getGArr("includeFileCache/list");
-		   var tmpArr=[];
-		   c.forEach(function(f){
-			   if(f['file']==fn['file']){
-				   //文件存在
+		   var tmpArr=[],isOverlap=false;
+		   if(Ds.isEmpty(c)){
+			   tmpArr.push(fn);
+		   }else{
+			   c.map(function(f){
+				   if(f['file']==fn['file']){
+					   isOverlap=true;
+					   return fn;
+				   }
+				   return f;
+			   });
+			   tmpArr=c;
+			   if(!isOverlap){
 				   tmpArr.push(fn);
-			   }else{
-				   tmpArr.push(f);
 			   }
-		   });
-		   c=tmpArr;
-		   Ds.setG("includeFileCache/list",c);
+		   }
+		   Ds.setG("includeFileCache/list",tmpArr);
 	   },
 	   _inLoadedFileQuque:function(file){
 		   //是否加载过该文件
@@ -367,20 +373,29 @@
 				   tmpArr.push(f);
 			   }
 		   });
-		   c=tmpArr;
-		   Ds.setG("includeFileCache/list",c);
+		   Ds.setG("includeFileCache/list",tmpArr);
 	   },
 	   _setLoadFileStatus:function(file,isload){
 		   var fn={file:file,isload:isload};
-		   Ds._putLoadFileToCache(fn);
+		   var c=Ds._getGArr("includeFileCache/list");
+		   c=c.map(function(f){
+				   if(f['file']==fn['file']){
+					   f['isload']=isload;
+				   }
+				   return f;
+			});
+			Ds.setG("includeFileCache/list",c);
 	   },
 	   _getLoadFileStatus:function(file){
 		   var c=Ds._getGArr("includeFileCache/list");
+		   var isload=0;
 		   c.forEach(function(f){
 			   if(f['file']!=file){
-				   return f['isload']||0;
+				   isload=f['isload']||0;
+				   return;
 			   }
 		   });
+		   return isload;
 	   },
 	   _loadCssFile:function(css,func){
            return Ds._dyLoadFile(css,func,'css');
